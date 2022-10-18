@@ -87,13 +87,7 @@ public static class WeightedRoundRobin
     /// </summary>
     private static int GetGcd(int a, int b)
     {
-        while (true)
-        {
-            if (b == 0) return Math.Abs(a);
-            var a1 = a;
-            a = b;
-            b = a1 % b;
-        }
+        return b == 0 ? Math.Abs(a) : GetGcd(b, a % b);
     }
 
     /// <summary>
