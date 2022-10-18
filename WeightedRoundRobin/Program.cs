@@ -12,32 +12,32 @@ public static class WeightedRoundRobin
         new()
         {
             Ip = "192.168.0.100",
-            Weight = 3
+            Weight = 1
         },
         new()
         {
             Ip = "192.168.0.101",
-            Weight = 2
+            Weight = 1
         },
         new()
         {
             Ip = "192.168.0.102",
-            Weight = 6
+            Weight = 1
         },
         new()
         {
             Ip = "192.168.0.103",
-            Weight = 4
+            Weight = 1
         },
         new()
         {
             Ip = "192.168.0.104",
             Weight = 1
-        },
+        }
     }.OrderBy(a => a.Weight).ToList();
 
     private static int _currentWeight; //当前调度的权值
-    private static int _lastServer = -1; //代表上一次选择的服务器
+    private static int _lastServerIndex = -1; //代表上一次选择的服务器
 
     private static readonly int Gcd = GetGcd(Servers); //表示集合S中所有服务器权值的最大公约数
     private static readonly int MaxWeight = GetMaxWeight(Servers); // 最大权重
@@ -54,8 +54,8 @@ public static class WeightedRoundRobin
     {
         while (true)
         {
-            _lastServer = (_lastServer + 1) % ServerCount;
-            if (_lastServer == 0)
+            _lastServerIndex = (_lastServerIndex + 1) % ServerCount;
+            if (_lastServerIndex == 0)
             {
                 _currentWeight -= Gcd;
                 if (_currentWeight <= 0)
@@ -66,9 +66,9 @@ public static class WeightedRoundRobin
                 }
             }
 
-            if (Servers[_lastServer].Weight >= _currentWeight)
+            if (Servers[_lastServerIndex].Weight >= _currentWeight)
             {
-                return Servers[_lastServer];
+                return Servers[_lastServerIndex];
             }
         }
     }
@@ -114,7 +114,8 @@ public class Program
     {
         ConcurrentDictionary<string, int> dic = new();
 
-        await Parallel.ForEachAsync(Enumerable.Range(1, 100000), new ParallelOptions { MaxDegreeOfParallelism = 1000 },
+        await Parallel.ForEachAsync(Enumerable.Range(1, 10000),
+            new ParallelOptions { MaxDegreeOfParallelism = 1000000 },
             (_, _) =>
             {
                 var server = WeightedRoundRobin.GetServer();
